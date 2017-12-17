@@ -1,0 +1,198 @@
+class Tree(object):
+  def __init__(self,data):
+    self.left = None
+    self.right = None
+    self.data = data
+  
+  def insert(self,data):
+    # Checking if the root exists here
+    if self.data:
+      #We make sure there is a root for the Tree
+      # Then decide shold the node be in the left or right subtree
+      
+      if data < self.data:
+        # so we have to make sure if the left node exists
+        #self.left.insert(data) #ERROR : NoneType object has no attribute insert
+        if (self.left):
+          self.left.insert(data)
+        else:
+          self.left = Tree(data) # making the left child a node, with its own children
+        
+      else:
+        #self.right.insert(data)
+        
+        if (self.right):
+          self.right.insert(data)
+        else:
+          self.right = Tree(data)
+        
+    else:
+      self.data = data
+    
+  def find(self,data,parent=None):
+    if data == self.data:
+      return self, parent
+    elif data < self.data:
+      # We missed one thing here, what if the left node is none??
+      # we need to check if it exists, then call the method
+      if (self.left is None):
+        return None,None
+      return self.left.find(data,self)
+    else:
+      if (self.right is None):
+        return None, None
+      return self.right.find(data,self)
+    
+  def children_count(self,node):
+    count = 0
+    if (node.left):
+      count += 1
+    if (node.right):
+      count += 1
+    return count
+    
+    
+  def delete(self, data):
+    
+    # 3 cases 
+    # Number of children == 0, 1, 2
+    
+    # Step -1 - Check if the node we are trying to delete is in the Tree
+    node, parent = self.find(data)
+    
+    # Write a finction to know the number of children, given the node
+    if (node is None):
+      return "There is no Node present in the tree"
+      
+      
+    # Step - 2 check for the number of children the node has
+      
+    if (node):
+      children_count = self.children_count(node)
+      
+      
+      # Step -3 based on the number of children, handle the 3 cases
+      # In all the cases, deal with the special case where the node is root
+      
+      # for all the cases, we have the data of 
+      # parent and the node
+    if children_count == 0:
+      '''
+        As the node has no children, we can directly delete the node
+        Simplest case
+        1) check if the parent exists, then it is a normal node:
+            check if the node is right node or left node
+            just delete the node
+        2) if it is the root node, then just replace the data of the node to None
+            The node is gone
+      '''
+      if parent:
+        if parent.left is node:
+          parent.left = None
+        else:
+          parent.right = None
+        del node
+      else:
+        #just replace the data with none
+        self.data = None
+    ####################################################################    
+    elif children_count == 1:
+      '''
+        if the node has only 1 child, just replace our node with theat child
+        Also handle the special case of root
+        1) check if the parent exists
+            check to see if the node has a left child or a right child
+            then just assign the parent.right or left to the child, thus loosing this child
+        2) What to do if we have to delete the root?? -- make the only child the root :)
+      '''
+      #As the node has only 1 child, lets store it in n 
+      if node.left:
+        n = node.left
+      else:
+        n = node.right
+      if parent:
+        # check to see if the node being deleted is the right child or left child
+        if parent.left is node: # we can't just do if(parent.left) as parent might have 2 children
+          parent.left = n
+        else:
+          parent.right = n
+        '''
+        this code is wrong as it is making a new tree 
+        because, we are not considering if the node being deleted
+        is the left child or right child of parent
+        if node.left:
+          parent.left = node.left
+        else:
+          parent.right = node.right
+       '''
+      else:
+        self.data = n.data
+        self.left = n.left
+        self.right = n.right
+    ############################################################################    
+    else:
+        
+      '''
+          Now that the node has 2 children and we need to delete the node
+          
+          In this case, we don't need the parent anymore
+          
+          Our node is the parent
+          
+          --- We need to find the SUCCESSOR
+          
+          Always have a "Right" Successor, so start with the successor as the 
+          right child of the node
+          
+          MAIN LOGIC:
+                
+                The node has to be replaced by left most leaf of the child node
+                
+                
+              
+      '''
+      parent = node
+      successor = node.right
+      while successor.left:
+        parent = successor
+        successor = successor.left
+      
+      # once we get the left most node,
+      # just assign the data of it to the node to be deleted
+      node.data = successor.data
+      
+      # Now we have 2 nodes with the same data
+      # make that right
+      # parent is pointing to the parent of the left most node that is moved
+      
+      if parent.left == successor:
+        parent.left = successor.right
+      else:
+        parent.right = successor.right
+      
+          
+          
+          
+          
+
+t = Tree(8)
+t.insert(3)
+t.insert(10)
+t.insert(1)
+t.insert(6)
+t.insert(4)
+t.insert(7)
+t.insert(5)
+t.insert(14)
+t.insert(13)
+print (t.find(4)[0].data)
+t.delete(1)
+print (t.find(6)[0].data)
+t.insert(1)
+print (t.delete(17))
+print (t.find(1)[0].data)
+#print (t.data)
+#print (t.left.data)
+##print (t.right.data)
+#print (t.left.left.data)
+#print (t.right.right.data)
